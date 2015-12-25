@@ -4,6 +4,9 @@
 import decimal
 import sqlite3
 
+decimal.getcontext().prec = 4
+decimal.getcontext().rounding = decimal.ROUND_HALF_UP
+
 def mkcorpus(sentences):
     return [(es.split(), fs.split()) for (es, fs) in sentences]
 
@@ -16,7 +19,8 @@ def _train(corpus, loop_count=1000):
     uniformPro = 1.0/len(f_keys)    #uniform probability initialization
     db = sqlite3.connect('mydb.db')
     cursor = db.cursor()
-    cursor.execute('''create table if not exists t(e text, f text, val real, primary key (e, f))''')  
+    cursor.execute('''create table if not exists t(e text, f text, val real, primary key (e, f))''')
+
     cursor.execute('''create table if not exists count(e text, f text, val real, primary key (e, f))''')
     cursor.execute('''create table if not exists total(f text unique, val real)''')
     cursor.execute('''create table if not exists s_total(e text unique, val real)''')
@@ -24,11 +28,12 @@ def _train(corpus, loop_count=1000):
         for e in es:
             s_total = 0.0
             for f in fs:
-                cursor.execute('''select val from t where e=? and f=?''',(e,f))
-                l = list(cursor)
+                c1=db.cursor()
+                c1.execute('''select val from t where e=? and f=?''',(e,f))
+                l = list(c1)
                 if l==[]:
                     t = uniformPro
-                else:   
+                else:
                     t = l[0][0]
                 s_total += t
             try:
@@ -82,8 +87,7 @@ def _train(corpus, loop_count=1000):
             cursor.execute('''insert into t values(?,?,?)''', (row[0], row[1], row[2]/total))
         except:
             cursor.execute('''update t set val = ? where e=? and f=?''', (row[0], row[1], row[2]/total))
-    cursor.execute('''select * from t''')
-                     
+                 
     cursor.execute('''create table if not exists myDict(englishWord text, persianWord text, val real)''')
     cursor.execute('''insert into myDict select * from t order by e asc, val desc''')
     cursor.execute('''drop table count''')
@@ -91,9 +95,8 @@ def _train(corpus, loop_count=1000):
     cursor.execute('''drop table s_total''')
     cursor.execute('''drop table t''')
     
-    cursor.execute('''select * from myDict limit 50''')
+    cursor.execute('''select * from myDict limit 500''')
     
-
     for row in cursor:
         print("{} {}\t{}".format(row[0], row[1], row[2]))
 
@@ -103,15 +106,12 @@ def _train(corpus, loop_count=1000):
     db.commit()
     db.close()
     
-    
 def train(bitext):
     corpus = mkcorpus(bitext)
     return _train(corpus)
 
 if __name__ == '__main__':
-    es = open("Clean_Mizan_En.txt")
-    fs = open("Clean_Mizan_Fa.txt", encoding="utf8")
-    bitext = list(zip(es, fs))
-    train(bitext)
-
-    
+    me = open("Clean_Mizan_En.txt")
+    mf = open("Clean_Mizan_Fa.txt", encoding="utf8")
+    bitext = list(zip(me, mf))
+    train(bitext)    
