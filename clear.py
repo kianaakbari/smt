@@ -35,14 +35,14 @@ def clear(fo,fw):
         fw.write(f)
         fw.write('\n')
     
-fo=open("a.txt",encoding = "utf8")
-fw=open("b.txt", "w", encoding="utf8")
+fo=open("Mizan_En.txt",encoding = "utf8")
+fw=open("Clean_Mizan_En.txt", "w", encoding="utf8")
 clear(fo,fw)
 fw.close()
 fo.close()
 
-fo=open("c.txt",encoding = "utf8")
-fw=open("d.txt", "w", encoding="utf8")
+fo=open("Mizan_Fa.txt",encoding = "utf8")
+fw=open("Clean_Mizan_Fa.txt", "w", encoding="utf8")
 clear(fo,fw)
 fw.close()
 fo.close()
