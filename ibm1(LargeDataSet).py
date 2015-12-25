@@ -98,7 +98,7 @@ def _train(corpus, loop_count=1000):
         print("{} {}\t{}".format(row[0], row[1], row[2]))
 
 #
-    cursor.execute('''drop table myDict''')
+#    cursor.execute('''drop table myDict''')
 #    
     db.commit()
     db.close()
@@ -109,8 +109,8 @@ def train(bitext):
     return _train(corpus)
 
 if __name__ == '__main__':
-    es = open("Mizan_En.txt")
-    fs = open("Mizan_Fa.txt", encoding="utf8")
+    es = open("clear_Mizan_En.txt")
+    fs = open("clear_Mizan_Fa.txt", encoding="utf8")
     bitext = list(zip(es, fs))
     train(bitext)
 
