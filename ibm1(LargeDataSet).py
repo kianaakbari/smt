@@ -109,8 +109,8 @@ def train(bitext):
     return _train(corpus)
 
 if __name__ == '__main__':
-    es = open("clear_Mizan_En.txt")
-    fs = open("clear_Mizan_Fa.txt", encoding="utf8")
+    es = open("clean_Mizan_En.txt")
+    fs = open("clean_Mizan_Fa.txt", encoding="utf8")
     bitext = list(zip(es, fs))
     train(bitext)
 
