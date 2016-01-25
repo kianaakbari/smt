@@ -42,22 +42,26 @@ def _train(corpus, loop_count=1000):
                 cursor.execute('''update s_total set val=? where e=?''', (s_total, e))
                     
         for e in es:
-            cursor.execute('''select val from s_total where e=?''', (e,))
+            cursor.execute('''create index if not exists st_e on s_total(e)''')
+            cursor.execute('''select val from s_total indexed by st_e where e=?''', (e,))
             l = list(cursor)
             s_total = l[0][0]
             for f in fs:
-                cursor.execute('''select val from total where f=?''', (f,))
+                cursor.execute('''create index if not exists t_f on total(f)''')
+                cursor.execute('''select val from total indexed by t_f where f=?''', (f,))
                 l = list(cursor)
                 if l==[]:
                     total = 0.0
                 else:
                     total = l[0][0]
-                cursor.execute('''select val from count where e=? and f=?''', (e,f))
+                cursor.execute('''create index if not exists c_ef on count(e, f)''')
+                cursor.execute('''select val from count indexed by c_ef where e=? and f=?''', (e,f))
                 l = list(cursor)
                 if l==[]:
                     count = 0.0
                 else:
                     count = l[0][0]
+                cursor.execute('''create index if not exists t_ef on t(e, f)''')
                 cursor.execute('''select val from t where e=? and f=?''',(e,f))
                 l = list(cursor)
                 if l==[]:
@@ -80,7 +84,7 @@ def _train(corpus, loop_count=1000):
     c1 = db.cursor()
     c1.execute('''select * from count''')
     for row in c1:
-        cursor.execute('''select val from total where f=?''',(row[1],))
+        cursor.execute('''select val from total indexed by t_f where f=?''',(row[1],))
         l1 = list(cursor)
         total = l1[0][0]
         try:
