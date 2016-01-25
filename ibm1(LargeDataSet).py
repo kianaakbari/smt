@@ -62,7 +62,7 @@ def _train(corpus, loop_count=1000):
                 else:
                     count = l[0][0]
                 cursor.execute('''create index if not exists t_ef on t(e, f)''')
-                cursor.execute('''select val from t where e=? and f=?''',(e,f))
+                cursor.execute('''select val from t indexed by t_ef where e=? and f=?''',(e,f))
                 l = list(cursor)
                 if l==[]:
                     t =uniformPro
