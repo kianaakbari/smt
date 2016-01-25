@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # coding:utf-8
 
-import os
 import collections
 import ibmmodel1
 import utility
 import decimal
 from decimal import Decimal as D
+import sqlite3
 
 # set deciaml context
 decimal.getcontext().prec = 4
@@ -23,8 +23,6 @@ class _keydefaultdict(collections.defaultdict):
             return ret
 
 def _train(corpus, loop_count=1000):
-    #print(corpus)
-    #print(loop_count)
     f_keys = set()
     for (es, fs) in corpus:
         for f in fs:
@@ -52,8 +50,6 @@ def _train(corpus, loop_count=1000):
         for (es, fs) in corpus:
             l_e = len(es)
             l_f = len(fs)
-            #l_e = os.stat(es).st_size
-            #l_f = os.stat(fs).st_size
             
             # compute normalization
             for (j, e) in enumerate(es, 1):
@@ -109,8 +105,6 @@ def viterbi_alignment(le, lf, t, a):
     max_a = collections.defaultdict(float)
     l_e = len(le)
     l_f = len(lf)
-    #l_e = os.stat(es).st_size
-    #l_f = os.stat(fs).st_size
     
     for (j, e) in enumerate(es, 1):
         current_max = (0, -1)
@@ -168,18 +162,32 @@ def test_viterbi_alignment():
 if __name__ == '__main__':
     import sys
 
-    es = open(sys.argv[1]) if len(sys.argv) >= 3 else open("a.txt")
-    fs = open(sys.argv[2], encoding="utf-8") if len(sys.argv) >= 3 else open("b.txt", encoding="utf8")
+    es = open(sys.argv[1]) if len(sys.argv) >= 3 else open("a3.txt")
+    fs = open(sys.argv[2], encoding="utf-8") if len(sys.argv) >= 3 else open("b3.txt", encoding="utf8")
     bitext = list(zip(es, fs))
     t, a = train(bitext, loop_count=3)
 
-    #es = "私 は 先生 です".split()
-    #fs = "I am a teacher".split()
-#    le = list(es.read().split())
-#    lf = list(es.read().split())
-#    args = (le, lf, t, a)
-#    print(show_matrix(*args))
+    db = sqlite3.connect('mydb.db')
+    cursor = db.cursor()
+    cursor.execute('''create table if not exists tmp(englishWord text, persianWord text, val real)''')
 
     for (e, f), val in t.items():
-        if(val>=0.8):
-            print("{} {}\t{}".format(e, f, val))
+        cursor.execute('''insert into tmp values(?, ?, ?)''', (e, f, float(val)))
+
+    cursor.execute('''create table if not exists myDict(englishWord text, persianWord text, val real)''')
+    cursor.execute('''insert into myDict select * from tmp order by englishWord asc, val desc''')
+    cursor.execute('''select * from myDict limit 50''')
+        
+    for row in cursor:
+        print("{} {}\t{}".format(row[0], row[1], row[2]))
+    print('\n')
+
+    cursor.execute('''delete from tmp''')
+    cursor.execute('''delete from myDict''')
+
+#
+    cursor.execute('''drop table myDict''') 
+#
+    
+    db.commit()
+    db.close()
