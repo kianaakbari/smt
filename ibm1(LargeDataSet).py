@@ -93,7 +93,8 @@ def _train(corpus, loop_count=1000):
             cursor.execute('''update t set val = ? where e=? and f=?''', (row[0], row[1], row[2]/total))
                  
     cursor.execute('''create table if not exists myDict(englishWord text, persianWord text, val real)''')
-    cursor.execute('''insert into myDict select * from t where val>0.8 order by e asc, val desc''')
+    cursor.execute('''create index t_v on t(val)''')
+    cursor.execute('''insert into myDict select * from t indexed by t_v where val>0.8 order by e asc, val desc''')
     cursor.execute('''drop table count''')
     cursor.execute('''drop table total''')
     cursor.execute('''drop table s_total''')
