@@ -1,2 +1,2 @@
-# creating word alignments from bilingual corpus
-artificial intelligence course project @ IUST
+# Creating word alignments from bilingual corpus
+Artificial Intelligence course project @ IUST
